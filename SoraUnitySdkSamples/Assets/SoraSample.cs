@@ -17,6 +17,7 @@ public class SoraSample : MonoBehaviour
     }
 
     Sora sora;
+    Sora.Config config;
     enum State
     {
         Init,
@@ -94,7 +95,7 @@ public class SoraSample : MonoBehaviour
     public Sora.SimulcastRidType simulcastRidType = Sora.SimulcastRidType.R0;
 
     public int videoBitRate = 0;
-    public int videoFps = 30;
+    // public int videoFps = 30;
     public enum VideoSize
     {
         QVGA,
@@ -630,7 +631,7 @@ public class SoraSample : MonoBehaviour
             Sora.Setenv("SORA_LYRA_MODEL_COEFFS_PATH", modelPath);
         }
 
-        var config = new Sora.Config()
+        config = new Sora.Config()
         {
             SignalingUrl = signalingUrl,
             SignalingUrlCandidate = signalingUrlCandidate,
@@ -653,7 +654,7 @@ public class SoraSample : MonoBehaviour
             {
                 CapturerType = captureUnityCamera && capturedCamera != null ? Sora.CapturerType.UnityCamera : Sora.CapturerType.DeviceCamera,
                 UnityCamera = capturedCamera,
-                VideoFps = videoFps,
+                //VideoFps = videoFps,
                 VideoWidth = videoWidth,
                 VideoHeight = videoHeight,
                 VideoCapturerDevice = videoCapturerDevice,
@@ -812,9 +813,12 @@ public class SoraSample : MonoBehaviour
         {
             return;
         }
-        int videoWidth;
-        int videoHeight;
-        GetVideoSize(videoSize, out videoWidth, out videoHeight);
+        var videoWidth = config.CameraConfig.VideoWidth;
+        var videoHeight = config.CameraConfig.VideoHeight;
+        var videoFps = config.CameraConfig.VideoFps;
+        var unityCameraRenderTargetDepthBuffer = config.CameraConfig.UnityCameraRenderTargetDepthBuffer;
+
+        Debug.LogFormat("SwitchCamera: UnityCameraRenderTargetDepthBuffer={0}", unityCameraRenderTargetDepthBuffer);
 
         if (captureUnityCamera)
         {
@@ -823,7 +827,7 @@ public class SoraSample : MonoBehaviour
         }
         else
         {
-            sora.SwitchCamera(Sora.CameraConfig.FromUnityCamera(capturedCamera, 16, videoWidth, videoHeight, videoFps));
+            sora.SwitchCamera(Sora.CameraConfig.FromUnityCamera(capturedCamera, unityCameraRenderTargetDepthBuffer, videoWidth, videoHeight, videoFps));
             captureUnityCamera = true;
         }
     }
