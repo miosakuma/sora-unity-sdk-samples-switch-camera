@@ -56,6 +56,9 @@ public class SoraSample : MonoBehaviour
 
     public bool captureUnityCamera;
     public Camera capturedCamera;
+    public Camera capturedCamera2;
+    int unityCameraIndex = 0;
+    Camera[] unityCameras = new Camera[2]; 
 
     public bool video = true;
     public new bool audio = true;
@@ -194,6 +197,9 @@ public class SoraSample : MonoBehaviour
         DumpDeviceInfo("video capturer devices", Sora.GetVideoCapturerDevices());
         DumpDeviceInfo("audio recording devices", Sora.GetAudioRecordingDevices());
         DumpDeviceInfo("audio playout devices", Sora.GetAudioPlayoutDevices());
+
+        unityCameras[0] = capturedCamera;
+        unityCameras[1] = capturedCamera2;
 
         if (!MultiRecv)
         {
@@ -651,8 +657,9 @@ public class SoraSample : MonoBehaviour
             VideoBitRate = videoBitRate,
             CameraConfig = new Sora.CameraConfig()
             {
-                CapturerType = captureUnityCamera && capturedCamera != null ? Sora.CapturerType.UnityCamera : Sora.CapturerType.DeviceCamera,
-                UnityCamera = capturedCamera,
+                //CapturerType = captureUnityCamera && capturedCamera != null ? Sora.CapturerType.UnityCamera : Sora.CapturerType.DeviceCamera,
+                CapturerType = Sora.CapturerType.UnityCamera,
+                UnityCamera =unityCameras[unityCameraIndex],
                 VideoFps = videoFps,
                 VideoWidth = videoWidth,
                 VideoHeight = videoHeight,
@@ -816,15 +823,15 @@ public class SoraSample : MonoBehaviour
         int videoHeight;
         GetVideoSize(videoSize, out videoWidth, out videoHeight);
 
-        if (captureUnityCamera)
+        if (unityCameraIndex == 0)
         {
-            sora.SwitchCamera(Sora.CameraConfig.FromDeviceCamera(videoCapturerDevice, videoWidth, videoHeight, videoFps));
-            captureUnityCamera = false;
+            unityCameraIndex = 1;
+            sora.SwitchCamera(Sora.CameraConfig.FromUnityCamera(unityCameras[unityCameraIndex], 16, videoWidth, videoHeight, videoFps));
         }
         else
         {
-            sora.SwitchCamera(Sora.CameraConfig.FromUnityCamera(capturedCamera, 16, videoWidth, videoHeight, videoFps));
-            captureUnityCamera = true;
+            unityCameraIndex = 0;
+            sora.SwitchCamera(Sora.CameraConfig.FromUnityCamera(unityCameras[unityCameraIndex], 16, videoWidth, videoHeight, videoFps));
         }
     }
 
